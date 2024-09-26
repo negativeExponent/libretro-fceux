@@ -17,25 +17,25 @@
 
 #undef INLINE
 
-#include "../src/fceu.h"
-#include "../src/utils/endian.h"
-#include "../src/utils/memory.h"
-#include "../src/input.h"
-#include "../src/state.h"
-#include "../src/ppu.h"
-#include "../src/cart.h"
-#include "../src/x6502.h"
-#include "../src/git.h"
-#include "../src/palette.h"
-#include "../src/sound.h"
-#include "../src/file.h"
-#include "../src/cheat.h"
-#include "../src/ines.h"
-#include "../src/unif.h"
-#include "../src/fds.h"
-#include "../src/vsuni.h"
-#include "../src/video.h"
-#include "../src/movie.h"
+#include "../../fceu.h"
+#include "../../utils/endian.h"
+#include "../../utils/memory.h"
+#include "../../input.h"
+#include "../../state.h"
+#include "../../ppu.h"
+#include "../../cart.h"
+#include "../../x6502.h"
+#include "../../git.h"
+#include "../../palette.h"
+#include "../../sound.h"
+#include "../../file.h"
+#include "../../cheat.h"
+#include "../../ines.h"
+#include "../../unif.h"
+#include "../../fds.h"
+#include "../../vsuni.h"
+#include "../../video.h"
+#include "../../movie.h"
 
 #include "libretro_input.h"
 
@@ -169,6 +169,8 @@ static uint8 sndquality;
 static uint32 current_palette = 0;
 static unsigned serialize_size;
 
+static bool rom_tvsystem = 0; /* system region set by rom */
+
 /* extern forward decls.*/
 extern uint8 PALRAM[0x20];
 extern uint8 SPRAM[0x100];
@@ -261,8 +263,9 @@ const char *GetKeyboard(void) {
 /* write full 512 palette from offset 256 */
 void FCEUD_SetPaletteDemphasis(void)
 {
-	int i;
-	for (i = 0; i < 512; i++)
+	if (!palo) return;
+
+	for (int i = 0; i < 512; i++)
 		retro_palette[256] = BUILD_PIXEL(
 			palo[i].r >> RED_EXPAND,
 			palo[i].g >> GREEN_EXPAND,
@@ -710,6 +713,7 @@ static void set_user_palette(void);
 
 static void ResetPalette(void) {
 	set_user_palette();
+	FCEUD_SetPaletteDemphasis();
 #if defined(HAVE_NTSC_FILTER)
 	ntsc_set_filter();
 #endif
@@ -904,7 +908,6 @@ static double get_aspect_ratio(void) {
 static void set_user_palette(void) {
 	unsigned i;
 
-#if 0
 	palette_game_available = false;
 	palette_user_available = false;
 	use_raw_palette        = false;
@@ -916,13 +919,13 @@ static void set_user_palette(void) {
 	/* Reset and choose between default internal or external custom palette */
 	/* if palette_game_available is set to 1, external palette
 	 * is loaded, else it will load default NES palette.
-	 * FCEUI_SetPaletteUser() both resets the palette array to
+	 * FCEUI_SetUserPalette() both resets the palette array to
 	 * internal default palette and then chooses which one to use. */
 	else if (current_palette == PALETTE_INTERNAL) {
-		FCEUI_SetPaletteUser(NULL, 0);
+		FCEUI_SetUserPalette(NULL, 0);
 	} else if ((current_palette == PALETTE_CUSTOM) && external_palette_exist) {
 		palette_game_available = true;
-		FCEUI_SetPaletteUser(NULL, 0);
+		FCEUI_SetUserPalette(NULL, 0);
 	}
 
 	/* setup raw palette */
@@ -939,9 +942,8 @@ static void set_user_palette(void) {
 
 	/* setup palette presets */
 	else {
-		FCEUI_SetPaletteUser(palettes[current_palette].data, 64);
+		FCEUI_SetUserPalette((uint8*)palettes[current_palette].data, 64);
 	}
-#endif
 }
 
 /* Set variables for NTSC(1) / PAL(2) / Dendy(3)
@@ -949,35 +951,30 @@ static void set_user_palette(void) {
  * and has 50 dummy scanlines to force 50 fps.
  */
 static void set_system_region(unsigned region) {
-	bool nespal = false;
-	bool dendy  = false;
+	int r = 0;
 
-#if 0
 	switch (region) {
 	case 0: /* AUTO */
-		if (iNESCart.region == DENDY) {
-			dendy = true;
-		} else {
-			nespal = iNESCart.region == NES_PAL;
-		}
+		r = rom_tvsystem;
 		break;
 	case 1: /* NTSC */
-		FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: NTSC");
+		r = 0;
+		//FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: NTSC");
 		break;
 	case 2: /* PAL */
-		nespal = true;
-		FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: PAL");
+		r = 1;
+		//FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: PAL");
 		break;
 	case 3: /* Dendy */
-		dendy = true;
-		FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: Dendy");
+		r = 2;
+		//FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: Dendy");
 		break;
 	}
 
 	dendy = dendy;
-	FCEUI_SetVidSystem(nespal);
+	FCEUI_SetRegion(r, true);
+	//FCEUI_SetVidSystem(nespal);
 	ResetPalette();
-#endif
 }
 
 #define VOLUME_MAX 256
@@ -1034,15 +1031,13 @@ static void check_variables_use_newppu(bool use_newppu) {
 static void check_variables(bool startup) {
 	struct retro_variable var  = { 0 };
 	bool stereo_filter_updated = false;
-	int nes_sprites = 1, nes_background = 1;
+	bool nes_sprites = true, nes_background = true;
 
 	/* 1 = Performs only geometry update: e.g. overscans */
 	/* 2 = Performs video/geometry update when needed and timing changes: e.g. region and filter change */
 	int audio_video_updated = 0;
 
-#if 0
-
-	var.key = "fceumm_sound_rate";
+	/*var.key = "fceumm_sound_rate";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int value = atoi(var.value);
@@ -1050,9 +1045,9 @@ static void check_variables(bool startup) {
 			FCEUI_Sound(value);
 			audio_video_updated |= 2;
 		}
-	}
+	}*/
 
-	var.key = "fceumm_ramstate";
+	/*var.key = "fceumm_ramstate";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "random")) {
@@ -1062,7 +1057,7 @@ static void check_variables(bool startup) {
 		} else {
 			FSettings.RamInitState = 0;
 		}
-	}
+	}*/
 
 #if defined(HAVE_NTSC_FILTER)
 	var.key = "fceumm_ntsc_filter";
@@ -1087,7 +1082,7 @@ static void check_variables(bool startup) {
 	}
 #endif /* HAVE_NTSC_FILTER */
 
-	FCEUI_GetRenderPlanes(&nes_sprites, &nes_background);
+	FCEUI_GetRenderPlanes(nes_sprites, nes_background);
 
 	var.key = "fceumm_hide_sprites";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
@@ -1161,7 +1156,7 @@ static void check_variables(bool startup) {
 		FCEUI_DisableSpriteLimitation(no_sprite_limit);
 	}
 
-	var.key = "fceumm_overclocking";
+	/*var.key = "fceumm_overclocking";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 
@@ -1184,11 +1179,11 @@ static void check_variables(bool startup) {
 
 		ppu.normal_scanlines = (dendy ? 290 : 240) + newppu;
 		ppu.totalscanlines = ppu.normal_scanlines + (FSettings.PPUOverclockEnabled ? ppu.overclock.postrender_scanlines : 0);
-	}
+	}*/
 
 	var.key = "fceumm_zapper_mode";
 
-	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+	/*if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		FCEU_ZapperSetSTMode(false);
 		if (!strcmp(var.value, "mouse")) {
 			input_set_zapper_mode(RetroMouse);
@@ -1198,7 +1193,7 @@ static void check_variables(bool startup) {
 			input_set_zapper_mode(RetroSTLightgun);
 			FCEU_ZapperSetSTMode(true);
 		} else {
-			input_set_zapper_mode(RetroLightgun); /*default setting*/
+			input_set_zapper_mode(RetroLightgun);
 		}
 	}
 
@@ -1226,7 +1221,7 @@ static void check_variables(bool startup) {
 		} else if (!strcmp(var.value, "disabled")) {
 			FCEU_ZapperInvertSensor(false);
 		}
-	}
+	}*/
 
 	var.key = "fceumm_arkanoid_mode";
 
@@ -1249,7 +1244,7 @@ static void check_variables(bool startup) {
 		input_set_mousesensitivity(value);
 	}
 
-	var.key = "fceumm_show_crosshair";
+	/*var.key = "fceumm_show_crosshair";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "enabled")) {
@@ -1257,7 +1252,7 @@ static void check_variables(bool startup) {
 		} else if (!strcmp(var.value, "disabled")) {
 			FSettings.ShowCrosshair = 0;
 		}
-	}
+	}*/
 
 #if defined(PSP)
 	var.key = "fceumm_overscan";
@@ -1404,12 +1399,12 @@ static void check_variables(bool startup) {
 		FCEUI_SetLowPass(lowpass);
 	}
 
-	var.key = "fceumm_reducedmcpopping";
+	/*var.key = "fceumm_reducedmcpopping";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool newval = (!strcmp(var.value, "enabled"));
 		FCEUI_ReduceDmcPopping(newval);
-	}
+	}*/
 
 	var.key = "fceumm_sndstereodelay";
 
@@ -1436,15 +1431,15 @@ static void check_variables(bool startup) {
 	var.key = "fceumm_sndvolume";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-		int val = (int)((float)VOLUME_MAX * atof(var.value) / 200.0f);
-		FCEUI_SetSoundVolume(SND_MASTER, val);
+		int val = (int)((float)VOLUME_MAX * atof(var.value) / 150.0f);
+		FCEUI_SetSoundVolume(val);
 	}
 
 	var.key = "fceumm_swapduty";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool newval = (!strcmp(var.value, "enabled"));
-		FSettings.SwapDutyCycles = newval;
+		swapDuty = newval;
 	}
 
 	if ((stereo_filter_updated || (audio_video_updated == 2)) && !startup) {
@@ -1462,10 +1457,9 @@ static void check_variables(bool startup) {
 		}
 	}
 
-	check_variables_volume_levels();
-	check_dipswitch_variables();
+	//check_variables_volume_levels();
+	//check_dipswitch_variables();
 	update_option_visibility();
-#endif
 }
 
 void input_palette_switch(bool palette_next, bool palette_prev) {
@@ -2127,11 +2121,13 @@ bool retro_load_game(const struct retro_game_info *info) {
 		return false;
 	}
 
-	//external_palette_exist = palette_game_available ? true : false;
-	//if (external_palette_exist) {
-	//	FCEU_printf(" Loading custom palette: %s%cnes.pal\n", (char *)system_dir, PATH_DEFAULT_SLASH_C());
-	//}
-	//current_palette = 0;
+	external_palette_exist = palette_game_available ? true : false;
+	if (external_palette_exist) {
+		FCEU_printf(" Loading custom palette: %s%cnes.pal\n", (char *)system_dir, PATH_DEFAULT_SLASH_C());
+	}
+	current_palette = 0;
+
+	rom_tvsystem = FCEUI_GetRegion();
 
 	check_variables(true);
 	stereo_filter_init();
@@ -2143,8 +2139,6 @@ bool retro_load_game(const struct retro_game_info *info) {
 	//set_memory_maps();
 
 	PowerNES();
-
-	FCEUD_SetPaletteDemphasis();
 
 	return true;
 }

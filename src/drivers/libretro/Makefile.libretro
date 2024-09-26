@@ -716,8 +716,8 @@ else
 CFLAGS   += -O0 -g
 CXXFLAGS += -O0 -g
 endif
-CFLAGS   += -DDEBUG
-CXXFLAGS += -DDEBUG
+CFLAGS   +=
+CXXFLAGS +=
 else
 ifneq (,$(findstring msvc,$(platform)))
 CFLAGS   += -MT
