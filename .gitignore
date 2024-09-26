@@ -48,3 +48,5 @@ fceux-net-server
 
 # typical CMake build directory
 /build
+src/drivers/libretro/*.so
+src/drivers/libretro/*.dll

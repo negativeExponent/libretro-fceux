@@ -79,9 +79,13 @@ extern void RefreshThrottleFPS();
 #ifdef __QT_DRIVER__
 #include "drivers/Qt/sdl.h"
 #else
+#ifdef __LIBRETRO__
+#include "drivers/libretro/retro_wrapper.h"
+#else
 #include "drivers/sdl/sdl.h"
-#endif
-#endif
+#endif /* !__LIBRETRO__ */
+#endif /* !__QT_DRIVER__ */
+#endif /* !__WIN_DRIVER__ */
 
 #include <fstream>
 #include <sstream>

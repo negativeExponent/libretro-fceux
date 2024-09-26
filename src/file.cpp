@@ -314,6 +314,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 				}
 			}
 
+#ifndef __LIBRETRO__
 			//try to read a gzipped file
 			{
 				uint32 magic;
@@ -348,6 +349,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 					}
 				}
 			}
+#endif
 
 
 			//open a plain old file

@@ -1,0 +1,85 @@
+LIBRETRO_COMM_DIR := $(LIBRETRO_DIR)/libretro-common
+
+INCFLAGS := \
+	-I$(LIBRETRO_DIR) \
+	-I$(LIBRETRO_COMM_DIR)/include \
+	-I$(SOURCE_DIR) \
+	-I$(SOURCE_DIR)/input \
+	-I$(SOURCE_DIR)/boards
+
+ifneq (,$(findstring msvc2003,$(platform)))
+	INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
+endif
+
+FCEU_SRC_DIRS := \
+	$(SOURCE_DIR)/input \
+	$(SOURCE_DIR)/boards
+
+SOURCES_C := $(foreach dir,$(FCEU_SRC_DIRS),$(wildcard $(dir)/*.c))
+
+SOURCES_CXX := $(foreach dir,$(FCEU_SRC_DIRS),$(wildcard $(dir)/*.cpp))
+
+COREDEFINES += -DHAVE_ASPRINTF -DHAVE_NO_LANGEXTRA -D_SYSTEM_MINIZIP
+LDFLAGS += -lminizip -lz
+
+ifeq ($(HAVE_NTSC),1)
+	COREDEFINES += \
+		-DHAVE_NTSC_FILTER \
+		-I$(SOURCE_DIR)/ntsc
+	SOURCES_C += \
+		$(SOURCE_DIR)/ntsc/nes_ntsc.c
+endif
+
+SOURCES_CXX += \
+	$(SOURCE_DIR)/cart.cpp \
+	$(SOURCE_DIR)/cheat.cpp \
+	$(SOURCE_DIR)/utils/crc32.cpp \
+	$(SOURCE_DIR)/drawing.cpp \
+	$(SOURCE_DIR)/utils/endian.cpp \
+	$(SOURCE_DIR)/utils/memory.cpp \
+	$(SOURCE_DIR)/utils/xstring.cpp \
+	$(SOURCE_DIR)/utils/unzip.cpp \
+	$(SOURCE_DIR)/emufile.cpp \
+	$(SOURCE_DIR)/fceu.cpp \
+	$(SOURCE_DIR)/fds.cpp \
+	$(SOURCE_DIR)/file.cpp \
+	$(SOURCE_DIR)/filter.cpp \
+	$(SOURCE_DIR)/utils/general.cpp \
+	$(SOURCE_DIR)/input.cpp \
+	$(SOURCE_DIR)/utils/md5.cpp \
+	$(SOURCE_DIR)/nsf.cpp \
+	$(SOURCE_DIR)/palette.cpp \
+	$(SOURCE_DIR)/ppu.cpp \
+	$(SOURCE_DIR)/sound.cpp \
+	$(SOURCE_DIR)/state.cpp \
+	$(SOURCE_DIR)/video.cpp \
+	$(SOURCE_DIR)/vsuni.cpp \
+	$(SOURCE_DIR)/ines.cpp \
+	$(SOURCE_DIR)/unif.cpp \
+	$(SOURCE_DIR)/x6502.cpp
+
+ifneq ($(STATIC_LINKING), 1)
+	SOURCES_C += \
+		$(LIBRETRO_COMM_DIR)/compat/compat_posix_string.c \
+		$(LIBRETRO_COMM_DIR)/compat/compat_strcasestr.c \
+		$(LIBRETRO_COMM_DIR)/compat/compat_strl.c \
+		$(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c \
+		$(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
+		$(LIBRETRO_COMM_DIR)/file/file_path.c \
+		$(LIBRETRO_COMM_DIR)/file/file_path_io.c \
+		$(LIBRETRO_COMM_DIR)/memmap/memalign.c \
+		$(LIBRETRO_COMM_DIR)/streams/file_stream.c \
+		$(LIBRETRO_COMM_DIR)/streams/file_stream_transforms.c \
+		$(LIBRETRO_COMM_DIR)/streams/memory_stream.c \
+		$(LIBRETRO_COMM_DIR)/string/stdstring.c \
+		$(LIBRETRO_COMM_DIR)/time/rtime.c \
+		$(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c
+ifdef _MSC_VER
+	SOURCES_C += \
+ 		$(LIBRETRO_COMM_DIR)/compat/compat_snprintf.c
+endif
+endif
+
+SOURCES_CXX += \
+	$(LIBRETRO_DIR)/libretro_input.cpp \
+	$(LIBRETRO_DIR)/libretro.cpp

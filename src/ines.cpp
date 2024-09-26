@@ -53,7 +53,11 @@ uint8 *MiscROM = NULL;
 uint8 *ExtraNTARAM = NULL;
 iNES_HEADER head;
 
+#ifdef __LIBRETRO__
+CartInfo iNESCart;
+#else
 static CartInfo iNESCart;
+#endif
 
 uint8 Mirroring = 0;
 uint8 MirroringAs2bits = 0;
