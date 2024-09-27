@@ -143,7 +143,7 @@ struct retro_core_option_v2_definition option_defs[] = {
          { "disabled", NULL },
          { NULL, NULL },
       },
-      "enabled",
+      "disabled",
    },
    {
       "fceumm_aspect",
@@ -343,8 +343,8 @@ struct retro_core_option_v2_definition option_defs[] = {
          { "44100", "44 kHz" },
          { "48000", "48 khz" },
          { "96000", "96 kHz" },
-         { "192000", "192 kHz (insane)" },
-         { "384000", "384 kHz (insane)" },
+         /*{ "192000", "192 kHz (insane)" },
+         { "384000", "384 kHz (insane)" },*/
          { NULL, NULL }
       },
       "44100",
@@ -1096,16 +1096,17 @@ struct retro_core_option_v2_definition option_defs[] = {
       "fceumm_ramstate",
       "RAM Power-On Fill (Restart Required)",
       NULL,
-      "RAM values on power up. Some games rely on initial RAM values for random number generation as an example.",
+      "RAM values on power up. Some games rely on initial RAM values for random number generation as an example.\n\nOption [$FF] will fil main RAM with 0xff.\n\nOption at [$00] will fill RAM with zero.\n\nOption [random] will fill RAM with a value between 0 and 255 randomly.\n\n[default]",
       NULL,
       "hacks",
       {
+         { "default",  "default" },
          { "fill $ff", "$FF" },
          { "fill $00", "$00" },
-         { "random",   "Random" },
+         { "random",   "random" },
          { NULL, NULL },
       },
-      "fill $ff",
+      "default",
    },
    { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL },
 };

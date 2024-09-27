@@ -983,6 +983,8 @@ u64 xoroshiro128plus_next() {
 void FCEU_MemoryRand(uint8 *ptr, uint32 size, bool default_zero) {
 	int x = 0;
 
+	FCEU_printf("init = %d size = %d zero = %d %p\n", RAMInitOption, size, default_zero, ptr);
+
 	while (size) {
 		uint8 v = 0;
 		switch (RAMInitOption)

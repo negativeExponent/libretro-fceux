@@ -1085,16 +1085,14 @@ static void check_variables_volume_levels(void) {
 
 /* FIXME */
 static void check_variables_use_newppu(bool use_newppu) {
-#if 0
 	if (newppu != use_newppu) {
 		newppu = use_newppu;
 		if (newppu) {
-			FSettings.PPUOverclockEnabled = FALSE; /* New PPU does not support overclocking */
+			overclock_enabled = false; /* New PPU does not support overclocking */
 			FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "Using New PPU\n");
 		}
 		set_system_region(opt_region);
 	}
-#endif
 }
 
 static void check_variables(bool startup) {
@@ -1106,7 +1104,7 @@ static void check_variables(bool startup) {
 	/* 2 = Performs video/geometry update when needed and timing changes: e.g. region and filter change */
 	int audio_video_updated = 0;
 
-	/*var.key = "fceumm_sound_rate";
+	var.key = "fceumm_sound_rate";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int value = atoi(var.value);
@@ -1114,19 +1112,21 @@ static void check_variables(bool startup) {
 			FCEUI_Sound(value);
 			audio_video_updated |= 2;
 		}
-	}*/
+	}
 
-	/*var.key = "fceumm_ramstate";
+	var.key = "fceumm_ramstate";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "random")) {
-			FSettings.RamInitState = 2;
+			RAMInitOption = 3;
 		} else if (!strcmp(var.value, "fill $00")) {
-			FSettings.RamInitState = 1;
+			RAMInitOption = 2;
+		} else if (!strcmp(var.value, "fill $ff")) {
+			RAMInitOption = 1;
 		} else {
-			FSettings.RamInitState = 0;
+			RAMInitOption = 0;
 		}
-	}*/
+	}
 
 #if defined(HAVE_NTSC_FILTER)
 	var.key = "fceumm_ntsc_filter";
@@ -1225,48 +1225,53 @@ static void check_variables(bool startup) {
 		FCEUI_DisableSpriteLimitation(no_sprite_limit);
 	}
 
-	/*var.key = "fceumm_overclocking";
+	var.key = "fceumm_overclocking";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 
-		if (!strcmp(var.value, "disabled")) {
-			FSettings.PPUOverclockEnabled      = 0;
-			FSettings.SkipDMC7BitOverclock     = 1;
-			ppu.overclock.postrender_scanlines = 0;
-			ppu.overclock.vblank_scanlines     = 0;
-		} else if (!strcmp(var.value, "2x-Postrender")) {
-			FSettings.PPUOverclockEnabled      = 1;
-			FSettings.SkipDMC7BitOverclock     = 1;
-			ppu.overclock.postrender_scanlines = 266;
-			ppu.overclock.vblank_scanlines     = 0;
-		} else if (!strcmp(var.value, "2x-VBlank")) {
-			FSettings.PPUOverclockEnabled      = 1;
-			FSettings.SkipDMC7BitOverclock     = 1;
-			ppu.overclock.postrender_scanlines = 0;
-			ppu.overclock.vblank_scanlines     = 266;
+		if (!strcmp(var.value, "disabled"))
+		{
+			overclock_enabled = 0;
+			skip_7bit_overclocking = 1;
+			postrenderscanlines = 0;
+			vblankscanlines = 0;
+		}
+		else if (!strcmp(var.value, "2x-Postrender"))
+		{
+			overclock_enabled = 1;
+			skip_7bit_overclocking = 1;
+			postrenderscanlines = 266;
+			vblankscanlines = 0;
+		}
+		else if (!strcmp(var.value, "2x-VBlank"))
+		{
+			overclock_enabled = 1;
+			skip_7bit_overclocking = 1;
+			postrenderscanlines = 0;
+			vblankscanlines = 266;
 		}
 
-		ppu.normal_scanlines = (dendy ? 290 : 240) + newppu;
-		ppu.totalscanlines = ppu.normal_scanlines + (FSettings.PPUOverclockEnabled ? ppu.overclock.postrender_scanlines : 0);
-	}*/
+		normalscanlines = (dendy ? 290 : 240) + newppu;
+		totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
+	}
 
 	var.key = "fceumm_zapper_mode";
 
-	/*if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-		FCEU_ZapperSetSTMode(false);
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+		/* FCEU_ZapperSetSTMode(false); */
 		if (!strcmp(var.value, "mouse")) {
 			input_set_zapper_mode(RetroMouse);
 		} else if (!strcmp(var.value, "touchscreen")) {
 			input_set_zapper_mode(RetroPointer);
-		} else if (!strcmp(var.value, "stlightgun")) {
+		/* }  else if (!strcmp(var.value, "stlightgun")) {
 			input_set_zapper_mode(RetroSTLightgun);
-			FCEU_ZapperSetSTMode(true);
+			FCEU_ZapperSetSTMode(true); */
 		} else {
 			input_set_zapper_mode(RetroLightgun);
 		}
 	}
 
-	var.key = "fceumm_zapper_tolerance";
+	/* var.key = "fceumm_zapper_tolerance";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		FCEU_ZapperSetTolerance(atoi(var.value));
