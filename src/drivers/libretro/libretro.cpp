@@ -2047,6 +2047,7 @@ static void set_memory_maps(void) {
 
 bool retro_load_game(const struct retro_game_info *info) {
 	const char *system_dir = NULL;
+	const char *save_dir = NULL;
 	enum retro_pixel_format rgb565;
 
 	struct retro_game_info_ext *info_ext = NULL;
@@ -2068,6 +2069,10 @@ bool retro_load_game(const struct retro_game_info *info) {
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir) {
 		FCEUI_SetBaseDirectory(system_dir);
+	}
+
+	if (environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &save_dir) && save_dir) {
+		FCEUI_SetDirOverride(FCEUIOD_NV, (char *)save_dir);
 	}
 
 	/* Attempt to fetch extended game info */
