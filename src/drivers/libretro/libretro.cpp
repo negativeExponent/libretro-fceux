@@ -923,9 +923,39 @@ static void set_user_palette(void) {
 	 * internal default palette and then chooses which one to use. */
 	else if (current_palette == PALETTE_INTERNAL) {
 		FCEUI_SetUserPalette(NULL, 0);
-	} else if ((current_palette == PALETTE_CUSTOM) && external_palette_exist) {
-		palette_game_available = true;
-		FCEUI_SetUserPalette(NULL, 0);
+	} else if (current_palette == PALETTE_CUSTOM) {
+		static bool pal_exist = false; /* does nes.pal exist? */
+		static bool pal_custom_is_loaded = false;
+		static uint8 pal_custom_data[512 * 3];
+		static uint32 pal_custom_size = 0; /* palette size in 64 x 3 */
+
+		if (pal_exist && pal_custom_is_loaded)
+		{
+			FCEUI_SetUserPalette(pal_custom_data, pal_custom_size);
+		}
+		else
+		{
+			/* try to load custom palette <system_dir>/nes.pal if available */
+			const char *tmpbase = FCEUI_GetBaseDirectory();
+			char tmppath[512];
+			snprintf(tmppath, sizeof(tmppath), "%s%c%s", tmpbase, PS, "nes.pal");
+			FILE *fp = FCEUD_UTF8fopen(tmppath, "rb");
+			if (fp)
+			{
+				size_t ssize;
+
+				fseek(fp, 0, SEEK_END);
+				ssize = ftell(fp);
+				rewind(fp);
+				fread(pal_custom_data, 1, ssize, fp);
+				FCEUI_SetUserPalette(pal_custom_data, ssize/3);
+				fclose(fp);
+
+				pal_custom_is_loaded = true;
+				pal_exist = true;
+				pal_custom_size = ssize / 3;
+			}
+		}
 	}
 
 	/* setup raw palette */
@@ -959,59 +989,100 @@ static void set_system_region(unsigned region) {
 		break;
 	case 1: /* NTSC */
 		r = 0;
-		//FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: NTSC");
 		break;
 	case 2: /* PAL */
 		r = 1;
-		//FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: PAL");
 		break;
 	case 3: /* Dendy */
 		r = 2;
-		//FCEUD_DispMessage(RETRO_LOG_INFO, 2000, "System: Dendy");
 		break;
 	}
 
-	dendy = dendy;
 	FCEUI_SetRegion(r, true);
-	//FCEUI_SetVidSystem(nespal);
 	ResetPalette();
 }
 
 #define VOLUME_MAX 256
 
 static void check_variables_volume_levels(void) {
-#if 0
-	struct {
-		int channel;
-		char name[25];
-	} apu_channels[] = {
-		{ SND_SQUARE1, "fceumm_apu_square_1" },
-		{ SND_SQUARE2, "fceumm_apu_square_2" },
-		{ SND_TRIANGLE, "fceumm_apu_triangle" },
-		{ SND_NOISE, "fceumm_apu_noise" },
-		{ SND_DMC, "fceumm_apu_dpcm" },
-		{ SND_FDS, "fceumm_apu_fds" },
-		{ SND_S5B, "fceumm_apu_s5b" },
-		{ SND_N163, "fceumm_apu_n163" },
-		{ SND_VRC6, "fceumm_apu_vrc6" },
-		{ SND_VRC7, "fceumm_apu_vrc7" },
-		{ SND_MMC5, "fceumm_apu_mmc5" },
-	};
 	struct retro_variable var = { 0 };
-	int i = 0;
-	int ssize = sizeof(apu_channels) / sizeof(apu_channels[0]);
 
-	for (i = 0; i < ssize; i++) {
-		int channel = apu_channels[i].channel;
-		var.key     = apu_channels[i].name;
-		if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-			int newval = VOLUME_MAX * atoi(var.value) / 100;
-			if (FCEUI_GetSoundVolume(channel) != newval) {
-				FCEUI_SetSoundVolume(channel, newval);
-			}
-		}
+	var.key = "fceumm_apu_square_1";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.Square1Volume = newval;
 	}
-#endif
+
+	var.key = "fceumm_apu_square_2";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.Square2Volume = newval;
+	}
+
+	var.key = "fceumm_apu_triangle";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.TriangleVolume = newval;
+	}
+
+	var.key = "fceumm_apu_noise";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.NoiseVolume = newval;
+	}
+
+	var.key = "fceumm_apu_dpcm";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}
+
+	/*var.key = "fceumm_apu_fds";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}
+
+	var.key = "fceumm_apu_s5b";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}
+
+	var.key = "fceumm_apu_n163";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}
+
+	var.key = "fceumm_apu_vrc6";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}
+
+	var.key = "fceumm_apu_vrc7";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}
+
+	var.key = "fceumm_apu_mmc5";
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int newval = VOLUME_MAX * atoi(var.value) / 100;
+		FSettings.PCMVolume = newval;
+	}*/
 }
 
 /* FIXME */
@@ -1457,7 +1528,7 @@ static void check_variables(bool startup) {
 		}
 	}
 
-	//check_variables_volume_levels();
+	check_variables_volume_levels();
 	//check_dipswitch_variables();
 	update_option_visibility();
 }
