@@ -2172,39 +2172,39 @@ unsigned retro_get_region(void) {
 }
 
 void *retro_get_memory_data(unsigned type) {
-#if 0
+	void *data;
+
 	switch (type) {
 	case RETRO_MEMORY_SAVE_RAM:
 		if (GameInfo->type == GIT_FDS) {
-			return FDSROM_ptr();
+			return NULL;
 		}
-		if (iNESCart.SaveGame[0]) {
-			return iNESCart.SaveGame[0];
+		if (iNESCart.battery && !iNESCart.SaveGame.empty())
+		{
+			return iNESCart.SaveGame[0].bufptr;
 		}
 		break;
 	case RETRO_MEMORY_SYSTEM_RAM:
 		return RAM;
 	}
-#endif
 
 	return NULL;
 }
 
 size_t retro_get_memory_size(unsigned type) {
-#if 0
 	switch (type) {
 	case RETRO_MEMORY_SAVE_RAM:
 		if (GameInfo->type == GIT_FDS) {
-			return FDSROM_size();
+			return 0;
 		}
-		if (iNESCart.SaveGameLen[0]) {
-			return iNESCart.SaveGameLen[0];
+		if (iNESCart.battery && !iNESCart.SaveGame.empty())
+		{
+			return iNESCart.SaveGame[0].buflen;
 		}
 		break;
 	case RETRO_MEMORY_SYSTEM_RAM:
 		return RAM_SIZE;
 	}
-#endif
 
 	return 0;
 }
