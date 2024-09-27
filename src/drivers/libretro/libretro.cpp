@@ -346,9 +346,6 @@ void FCEUD_DispMessage(enum retro_log_level level, unsigned duration, const char
 	}
 }
 
-/*palette for FCEU*/
-static bool external_palette_exist = 0;
-
 /* ========================================
  * Palette switching START
  * ======================================== */
@@ -1042,7 +1039,8 @@ static void check_variables_volume_levels(void) {
 		FSettings.PCMVolume = newval;
 	}
 
-	/*var.key = "fceumm_apu_fds";
+	/* TODO: Expansion sound volume
+	var.key = "fceumm_apu_fds";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
@@ -1869,6 +1867,8 @@ void retro_run(void) {
 	input_update(&input_cb);
 	FCEUI_Emulate(&gfx, &sound, &ssize, 0);
 
+	emp = XDBuf;
+
 #if defined(PSP)
 	retro_run_blit_psp(gfx);
 #elif defined(PS2)
@@ -1880,7 +1880,6 @@ void retro_run(void) {
 	} else
 #endif /* HAVE_NTSC_FILTER */
 	{
-		emp = XDBuf;
 		retro_run_blit(gfx, emp);
 	}
 #endif
@@ -2201,12 +2200,6 @@ bool retro_load_game(const struct retro_game_info *info) {
 	if (!(FCEUI_LoadGame(info->path, 1, false))) {
 		return false;
 	}
-
-	external_palette_exist = palette_game_available ? true : false;
-	if (external_palette_exist) {
-		FCEU_printf(" Loading custom palette: %s%cnes.pal\n", (char *)system_dir, PATH_DEFAULT_SLASH_C());
-	}
-	current_palette = 0;
 
 	rom_tvsystem = FCEUI_GetRegion();
 

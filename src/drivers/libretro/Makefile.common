@@ -25,9 +25,9 @@ LDFLAGS += -lminizip -lz
 ifeq ($(HAVE_NTSC),1)
 	COREDEFINES += \
 		-DHAVE_NTSC_FILTER \
-		-I$(SOURCE_DIR)/ntsc
+		-I$(LIBRETRO_DIR)/ntsc
 	SOURCES_C += \
-		$(SOURCE_DIR)/ntsc/nes_ntsc.c
+		$(LIBRETRO_DIR)/ntsc/nes_ntsc.c
 endif
 
 SOURCES_CXX += \

@@ -3,6 +3,8 @@
 
 #include "driver.h"
 
+#define NTSC_WIDTH 602
+
 #define NES_WIDTH  256
 #define NES_HEIGHT 240
 
