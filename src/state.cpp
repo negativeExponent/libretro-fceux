@@ -59,6 +59,10 @@
 #include <vector>
 #include <fstream>
 
+#ifdef __LIBRETRO__
+#include <streams/memory_stream.h>
+#endif
+
 using namespace std;
 
 static void (*SPreSave)(void) = NULL;
@@ -375,6 +379,83 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 int CurrentState=0;
 extern int geniestage;
 
+#ifdef __LIBRETRO__
+void FCEUSS_Save_Mem(void)
+{
+   memstream_t *mem = memstream_open(1);
+
+	// reinit memory_savestate
+	// memory_savestate is global variable which already has its vector of bytes, so no need to allocate memory every time we use save/loadstate
+	memory_savestate.set_len(0);	// this also seeks to the beginning
+	memory_savestate.unfail();
+
+	EMUFILE* os = &memory_savestate;
+
+	uint32 totalsize = 0;
+
+	FCEUPPU_SaveState();
+	FCEUSND_SaveState();
+	totalsize=WriteStateChunk(os,1,SFCPU);
+	totalsize+=WriteStateChunk(os,2,SFCPUC);
+	totalsize+=WriteStateChunk(os,3,FCEUPPU_STATEINFO);
+	totalsize+=WriteStateChunk(os,31,FCEU_NEWPPU_STATEINFO);
+	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
+	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
+	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED))
+	{
+		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
+
+		//MBG TAS Editor HACK HACK HACK!
+		//do not save the movie state if we are in Taseditor! That would be a huge waste of time and space!
+		if(!FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		{
+			os->fseek(5,SEEK_CUR);
+			int size = FCEUMOV_WriteState(os);
+			os->fseek(-(size+5),SEEK_CUR);
+			os->fputc(7);
+			write32le(size, os);
+			os->fseek(size,SEEK_CUR);
+
+			totalsize += 5 + size;
+		}
+	}
+	// save back buffer
+	{
+		extern uint8 *XBackBuf;
+		uint32 size = 256 * 256;
+		os->fputc(8);
+		write32le(size, os);
+		os->fwrite((char*)XBackBuf,size);
+		totalsize += 5 + size;
+	}
+
+	if(SPreSave) SPreSave();
+	totalsize+=WriteStateChunk(os,0x10,SFMDATA);
+	if(SPostSave) SPostSave();
+
+	//save the length of the file
+	size_t len = memory_savestate.size();
+
+	//sanity check: len and totalsize should be the same
+	if(len != totalsize)
+	{
+		FCEUD_PrintError("sanity violation: len != totalsize");
+		return;
+	}
+
+	//dump the header
+	uint8 header[16]="FCSX";
+	FCEU_en32lsb(header+4, totalsize);
+	FCEU_en32lsb(header+8, FCEU_VERSION_NUMERIC);
+	FCEU_en32lsb(header+12, 0);
+
+	//dump it to the destination file
+	memstream_write(mem, (char*)header, 16);
+	memstream_write(mem, (char*)(uint8*)memory_savestate.buf(), totalsize);
+
+	memstream_close(mem);
+}
+#endif
 
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 {
@@ -644,6 +725,54 @@ int FCEUSS_LoadFP_old(EMUFILE* is, ENUM_SSLOADPARAMS params)
 // Qt Driver NetPlay state load handler. This is to control state loading
 // during netplay, only hosts can load states and clients can request loads.
 bool NetPlayStateLoadReq(EMUFILE* is);
+#endif
+
+#ifdef __LIBRETRO__
+void FCEUSS_Load_Mem(void)
+{
+	memstream_t *mem = memstream_open(0);
+	uint8 header[16] = {0};
+	size_t totalsize = 0;
+	int stateversion = 0;
+
+	memstream_read(mem, header, 16);
+	if (memcmp(header, "FCSX", 4))
+		return;
+
+	totalsize = FCEU_de32lsb(header + 4);
+	stateversion = FCEU_de32lsb(header + 8);
+
+	// reinit memory_savestate
+	// memory_savestate is global variable which already has its vector of bytes, so no need to allocate memory every time we use save/loadstate
+	if ((memory_savestate.get_vec())->size() < totalsize)
+		(memory_savestate.get_vec())->resize(totalsize);
+	memory_savestate.set_len(totalsize);
+	memory_savestate.unfail();
+	memory_savestate.fseek(0, SEEK_SET);
+
+	{
+		void *tmp = FCEU_malloc(totalsize);
+		memstream_read(mem, tmp, totalsize);
+		memory_savestate.fwrite(tmp, totalsize);
+		memory_savestate.fseek(0, SEEK_SET);
+
+		/* we're done with main memory data here, so close it. */
+		FCEU_free(tmp);
+		memstream_close(mem);
+	}
+
+	bool x = (ReadStateChunks(&memory_savestate, totalsize) != 0);
+
+	if (GameStateRestore)
+	{
+		GameStateRestore(stateversion);
+	}
+	if (x)
+	{
+		FCEUPPU_LoadState(stateversion);
+		FCEUSND_LoadState(stateversion);
+	}
+}
 #endif
 
 bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)

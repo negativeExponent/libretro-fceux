@@ -1737,8 +1737,8 @@ void retro_set_environment(retro_environment_t cb) {
 		    false               /* persistent_data */
 		},
 		{
-		    "fds", /* extensions */
-		    true,              /* need_fullpath */
+		    "fds",              /* extensions */
+		    true,               /* need_fullpath */
 		    false               /* persistent_data */
 		},
 		{ NULL, false, false }
@@ -1893,8 +1893,10 @@ void retro_run(void) {
 	audio_batch_cb((const int16 *)sound, ssize);
 }
 
+void FCEUSS_Save_Mem(void);
+void FCEUSS_Load_Mem(void);
+
 size_t retro_serialize_size(void) {
-#if 0
 	if (serialize_size == 0) {
 		/* Something arbitrarily big.*/
 		uint8 *buffer = (uint8 *)malloc(1000000);
@@ -1904,13 +1906,11 @@ size_t retro_serialize_size(void) {
 		serialize_size = memstream_get_last_size();
 		free(buffer);
 	}
-#endif
 
 	return serialize_size;
 }
 
 bool retro_serialize(void *data, size_t size) {
-#if 0
 	/* Cannot save state while Game Genie
 	 * screen is open */
 	if (geniestage == 1) {
@@ -1924,12 +1924,9 @@ bool retro_serialize(void *data, size_t size) {
 	memstream_set_buffer((uint8 *)data, size);
 	FCEUSS_Save_Mem();
 	return true;
-#endif
-	return false;	
 }
 
 bool retro_unserialize(const void *data, size_t size) {
-#if 0
 	/* Cannot load state while Game Genie
 	 * screen is open */
 	if (geniestage == 1) {
@@ -1943,8 +1940,6 @@ bool retro_unserialize(const void *data, size_t size) {
 	memstream_set_buffer((uint8 *)data, size);
 	FCEUSS_Load_Mem();
 	return true;
-#endif
-	return false;
 }
 
 void retro_cheat_reset(void) {
