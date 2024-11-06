@@ -214,12 +214,12 @@ void FCEUD_NetworkClose(void)
 
 bool FCEUMOV_Mode(EMOVIEMODE modemask)
 {
-	return false;
+	return (movieMode&modemask)!=0;
 }
 
 bool FCEUMOV_Mode(int modemask)
 {
-	return false;
+	return FCEUMOV_Mode((EMOVIEMODE)modemask);
 }
 
 int FCEUMOV_GetFrame(void)
