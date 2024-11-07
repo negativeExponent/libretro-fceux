@@ -74,7 +74,7 @@ struct retro_core_option_v2_category option_cats_us[] = {
 
 struct retro_core_option_v2_definition option_defs[] = {
    {
-      "fceumm_region",
+      "fceux_region",
       "Region",
       NULL,
       "Force core to use NTSC, PAL or Dendy region timings.",
@@ -90,7 +90,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "Auto",
    },
    {
-      "fceumm_game_genie",
+      "fceux_game_genie",
       "Game Genie Add-On (Restart Required)",
       NULL,
       "Enable emulation of a Game Genie add-on cartridge, allowing cheat codes to be entered when launching games. The Game Genie ROM file 'gamegenie.nes' must be present in the frontend's system directory. Does not apply to FDS or arcade content.",
@@ -104,7 +104,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_show_adv_system_options",
+      "fceux_show_adv_system_options",
       "Show Advanced System Options",
       NULL,
       "Show advanced system options and tweaks.",
@@ -118,7 +118,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled"
    },
    {
-      "fceumm_show_adv_sound_options",
+      "fceux_show_adv_sound_options",
       "Show Advanced Sound Options",
       NULL,
       "Show advanced sound options and tweaks.",
@@ -132,7 +132,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled"
    },
    {
-      "fceumm_use_newppu",
+      "fceux_use_newppu",
       "Use New PPU",
       NULL,
       "Choose preferred PPU modes. NOTE: New PPU disables ppu overclocking.",
@@ -146,7 +146,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_aspect",
+      "fceux_aspect",
       "Aspect Ratio",
       NULL,
       "Choose preferred aspect ratio.",
@@ -162,7 +162,7 @@ struct retro_core_option_v2_definition option_defs[] = {
    },
 #ifdef PSP /* overscan options */
    {
-      "fceumm_overscan",
+      "fceux_overscan",
       "Crop Overscan",
       NULL,
       "Removes 8 pixel overscan from all sides of the screen.",
@@ -177,7 +177,7 @@ struct retro_core_option_v2_definition option_defs[] = {
    },
 #else
    {
-      "fceumm_overscan_left",
+      "fceux_overscan_left",
       "Crop Overscan (Left)",
       NULL,
       "Removes pixels from left side of the screen to simulate overscan seen on standard CRT televisions.",
@@ -196,7 +196,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "0",
    },
    {
-      "fceumm_overscan_right",
+      "fceux_overscan_right",
       "Crop Overscan (Right)",
       NULL,
       "Removes pixels from right side of the screen to simulate overscan seen on standard CRT televisions.",
@@ -215,7 +215,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "0",
    },
    {
-      "fceumm_overscan_top",
+      "fceux_overscan_top",
       "Crop Overscan (Top)",
       NULL,
       "Removes pixels from the top of the screen to simulate overscan seen on standard CRT televisions.",
@@ -234,7 +234,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "8",
    },
    {
-      "fceumm_overscan_bottom",
+      "fceux_overscan_bottom",
       "Crop Overscan (Bottom)",
       NULL,
       "Removes pixels from the bottom of the screen to simulate overscan seen on standard CRT televisions.",
@@ -254,7 +254,7 @@ struct retro_core_option_v2_definition option_defs[] = {
    },
 #endif /* overscan options */
    {
-      "fceumm_palette",
+      "fceux_palette",
       "Color Palette",
       NULL,
       "Choose from pre-generated palettes, a custom 64x3 palette from file or raw format (needs to use a nes-decoder shader).",
@@ -284,7 +284,7 @@ struct retro_core_option_v2_definition option_defs[] = {
    },
 #ifdef HAVE_NTSC_FILTER
    {
-      "fceumm_ntsc_filter",
+      "fceux_ntsc_filter",
       "NTSC Filter",
       NULL,
       "Blargg's NTSC filters are used to replicate RF, Composite, S-Video, and RGB cable signals.",
@@ -302,7 +302,7 @@ struct retro_core_option_v2_definition option_defs[] = {
    },
 #endif
    {
-      "fceumm_hide_sprites",
+      "fceux_hide_sprites",
       "Hide Sprites",
       NULL,
       "Show or hide sprites.",
@@ -316,7 +316,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled"
    },
    {
-      "fceumm_hide_background",
+      "fceux_hide_background",
       "Hide Background.",
       NULL,
       "Show or hide background.",
@@ -330,7 +330,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled"
    },
    {
-      "fceumm_sound_rate",
+      "fceux_sound_rate",
       "Sound Sample Rate",
       NULL,
       "Sets sound sample rate. ",
@@ -350,7 +350,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "44100",
    },
    {
-      "fceumm_sndquality",
+      "fceux_sndquality",
       "Sound Quality",
       NULL,
       "Enable higher quality sound. Increases performance requirements.",
@@ -365,7 +365,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "Low",
    },
    {
-      "fceumm_sndlowpass",
+      "fceux_sndlowpass",
       "Audio Low-pass Filter",
       NULL,
       "Apply a low pass audio filter to simulate the 'muted' sound of the NES when connected to a television via the RF modulator.",
@@ -381,7 +381,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_sndstereodelay",
+      "fceux_sndstereodelay",
       "Stereo Sound Effect",
       NULL,
       "Enable a fake stereo sound effect by delaying the right audio channel when upmixing the mono signal output from the NES.",
@@ -426,7 +426,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_swapduty",
+      "fceux_swapduty",
       "Swap Audio Duty Cycles",
       "Swap Duty Cycles",
       "Simulates the sound from famiclones that have the pulse wave channels duty cycle bits reversed.",
@@ -440,7 +440,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_reducedmcpopping",
+      "fceux_reducedmcpopping",
       "Reduce DMC Popping",
       NULL,
       "Reduce DMC audio popping sound.",
@@ -454,7 +454,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_sndvolume",
+      "fceux_sndvolume",
       "Master Volume",
       NULL,
       "Change master volume level %.",
@@ -508,7 +508,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_square_1",
+      "fceux_apu_square_1",
       "Channel Volume (Square 1)",
       NULL,
       "Change pulse wave generator 1 audio output.",
@@ -541,7 +541,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_square_2",
+      "fceux_apu_square_2",
       "Channel Volume (Square 2)",
       NULL,
       "Change pulse wave generator 2 audio output.",
@@ -574,7 +574,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_triangle",
+      "fceux_apu_triangle",
       "Channel Volume (Triangle)",
       NULL,
       "Modify triangle wave generator audio output.",
@@ -607,7 +607,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_noise",
+      "fceux_apu_noise",
       "Channel Volume (Noise)",
       NULL,
       "Change noise generator audio output.",
@@ -640,7 +640,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_dpcm",
+      "fceux_apu_dpcm",
       "Channel Volume (DPCM)",
       NULL,
       "Change delta modulation channel audio output.",
@@ -673,7 +673,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_fds",
+      "fceux_apu_fds",
       "Channel Volume (FDS)",
       NULL,
       "Change FDS expansion audio output.",
@@ -706,7 +706,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_s5b",
+      "fceux_apu_s5b",
       "Channel Volume (S5B)",
       NULL,
       "Change Sunsoft S5B expansion audio output.",
@@ -739,7 +739,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_n163",
+      "fceux_apu_n163",
       "Channel Volume (N163)",
       NULL,
       "Chnage Namco 163 expansion audio output.",
@@ -772,7 +772,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_vrc6",
+      "fceux_apu_vrc6",
       "Channel Volume (VRC6)",
       NULL,
       "Change VRC6 expansion audio output.",
@@ -805,7 +805,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_vrc7",
+      "fceux_apu_vrc7",
       "Channel Volume (VRC7)",
       NULL,
       "Change VRC7 expansion audio output.",
@@ -838,7 +838,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_apu_mmc5",
+      "fceux_apu_mmc5",
       "Channel Volume (MMC5)",
       NULL,
       "Change MMC5 expansion audio output.",
@@ -871,7 +871,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_turbo_enable",
+      "fceux_turbo_enable",
       "Turbo Enable",
       NULL,
       "Enables or disables turbo buttons.",
@@ -887,7 +887,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "None",
    },
    {
-      "fceumm_turbo_delay",
+      "fceux_turbo_delay",
       "Turbo Delay (in frames)",
       NULL,
       "Repeat rate of turbo buttons in frames.",
@@ -912,7 +912,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "3",
    },
    {
-      "fceumm_zapper_mode",
+      "fceux_zapper_mode",
       "Zapper/Mouse Mode",
       NULL,
       "Selects device to use for Zapper or Mouse/Pointer games.",
@@ -928,7 +928,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "lightgun",
    },
    {
-      "fceumm_show_crosshair",
+      "fceux_show_crosshair",
       "Show Zapper Crosshair",
       NULL,
       "Shows or hides on-screen crosshairs when using a Zapper.",
@@ -942,7 +942,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "enabled",
    },
    {
-      "fceumm_zapper_trigger",
+      "fceux_zapper_trigger",
       "Invert Zapper Trigger Signal",
       NULL,
       "Inverts trigger logic when using a Zapper. Disabling it resembles original hardware behavior.",
@@ -956,7 +956,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_zapper_sensor",
+      "fceux_zapper_sensor",
       "Invert Zapper Sensor Signal",
       NULL,
       "Inverts sensor logic when using a Zapper (Sequential Targets Light gun mode only). Disabling it resembles original NES/FC hardware behavior.",
@@ -970,7 +970,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "enabled",
    },
    {
-      "fceumm_zapper_tolerance",
+      "fceux_zapper_tolerance",
       "Zapper Tolerance",
       NULL,
       "Sets how many pixels from target area is on target.",
@@ -1003,7 +1003,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "6",
    },
    {
-      "fceumm_arkanoid_mode",
+      "fceux_arkanoid_mode",
       "Arkanoid Mode",
       NULL,
       "Selects device to use for Arkanoid games.",
@@ -1019,7 +1019,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "mouse",
    },
    {
-      "fceumm_mouse_sensitivity",
+      "fceux_mouse_sensitivity",
       "Mouse Sensitivity",
       NULL,
       "Mouse sensitivity in percent.",
@@ -1050,7 +1050,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "100",
    },
    {
-      "fceumm_up_down_allowed",
+      "fceux_up_down_allowed",
       "Allow Opposing Directions",
       NULL,
       "Allows simultaneous UP+DOWN or LEFT+RIGHT button combinations, which can create different effects in some games.",
@@ -1064,7 +1064,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_nospritelimit",
+      "fceux_nospritelimit",
       "No Sprite Limit",
       NULL,
       "Removes the 8-per-scanline hardware limit. This reduces sprite flickering but can cause some games to glitch since some use this for effects.",
@@ -1078,7 +1078,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_overclocking",
+      "fceux_overclocking",
       "Overclock",
       NULL,
       "Enables or disables overclocking, which can reduce slowdowns in some games. Postrender method is more compatible with every game, Vblank is more effective for games like Contra Force.",
@@ -1093,7 +1093,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       "disabled",
    },
    {
-      "fceumm_ramstate",
+      "fceux_ramstate",
       "RAM Power-On Fill (Restart Required)",
       NULL,
       "RAM values on power up. Some games rely on initial RAM values for random number generation as an example.\n\nOption [$FF] will fil main RAM with 0xff.\n\nOption at [$00] will fill RAM with zero.\n\nOption [random] will fill RAM with a value between 0 and 255 randomly.\n\n[default]",
@@ -1337,8 +1337,8 @@ static INLINE void libretro_set_core_options(retro_environment_t environ_cb,
 
             /* Skip options that are irrelevant when using the
              * old style core options interface */
-            if ((strcmp(key, "fceumm_show_adv_system_options") == 0) ||
-                (strcmp(key, "fceumm_advance_sound_options") == 0))
+            if ((strcmp(key, "fceux_show_adv_system_options") == 0) ||
+                (strcmp(key, "fceux_advance_sound_options") == 0))
                continue;
 
             if (desc)

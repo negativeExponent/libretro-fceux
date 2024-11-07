@@ -241,6 +241,7 @@ void FCEUD_FlushTrace()
 void FCEUD_VideoChanged(void)
 {
 	int buf;
+	buf = retro_get_region();
 	if(buf == 1)
 		PAL = 1;
 	else
@@ -404,7 +405,7 @@ static void palette_switch_init(void) {
 
 	/* Find option corresponding to palettes key */
 	for (opt_def = opt_defs; opt_def->key; opt_def++) {
-		if (!strcmp(opt_def->key, "fceumm_palette")) {
+		if (!strcmp(opt_def->key, "fceux_palette")) {
 			break;
 		}
 	}
@@ -424,7 +425,7 @@ static void palette_switch_init(void) {
 		if (opt_defs_intl) {
 			/* Find localised option corresponding to key */
 			for (opt_def_intl = opt_defs_intl; opt_def_intl->key; opt_def_intl++) {
-				if (!strcmp(opt_def_intl->key, "fceumm_palette")) {
+				if (!strcmp(opt_def_intl->key, "fceux_palette")) {
 					size_t j = 0;
 
 					/* Search for current option value */
@@ -477,7 +478,7 @@ static void palette_switch_set_index(uint32 palette_index) {
 		palette_index = PALETTE_TOTAL_COUNT - 1;
 
 	/* Notify frontend of option value changes */
-	var.key   = "fceumm_palette";
+	var.key   = "fceux_palette";
 	var.value = palette_opt_values[palette_index].value;
 	environ_cb(RETRO_ENVIRONMENT_SET_VARIABLE, &var);
 
@@ -729,7 +730,7 @@ static bool update_option_visibility(void) {
 		return false;
 	}
 
-	var.key   = "fceumm_show_adv_system_options";
+	var.key   = "fceux_show_adv_system_options";
 	var.value = NULL;
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
@@ -744,11 +745,11 @@ static bool update_option_visibility(void) {
 			unsigned i;
 			unsigned size;
 			char options_list[][25] = {
-				"fceumm_overclocking",
-				"fceumm_ramstate",
-				"fceumm_nospritelimit",
-				"fceumm_up_down_allowed",
-				"fceumm_show_crosshair"
+				"fceux_overclocking",
+				"fceux_ramstate",
+				"fceux_nospritelimit",
+				"fceux_up_down_allowed",
+				"fceux_show_crosshair"
 			};
 
 			option_display.visible = opt_showAdvSystemOptions;
@@ -762,7 +763,7 @@ static bool update_option_visibility(void) {
 		}
 	}
 
-	var.key   = "fceumm_show_adv_sound_options";
+	var.key   = "fceux_show_adv_sound_options";
 	var.value = NULL;
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
@@ -778,16 +779,16 @@ static bool update_option_visibility(void) {
 			unsigned i;
 			unsigned size;
 			char options_list[][25] = {
-				"fceumm_sndvolume",
-				"fceumm_sndquality",
-				"fceumm_sndlowpass",
-				"fceumm_sndstereodelay",
-				"fceumm_swapduty",
-				"fceumm_apu_1",
-				"fceumm_apu_2",
-				"fceumm_apu_3",
-				"fceumm_apu_4",
-				"fceumm_apu_5"
+				"fceux_sndvolume",
+				"fceux_sndquality",
+				"fceux_sndlowpass",
+				"fceux_sndstereodelay",
+				"fceux_swapduty",
+				"fceux_apu_1",
+				"fceux_apu_2",
+				"fceux_apu_3",
+				"fceux_apu_4",
+				"fceux_apu_5"
 			};
 
 			option_display.visible = opt_showAdvSoundOptions;
@@ -830,10 +831,10 @@ static void set_variables(void) {
 	 * fceumm_show_adv_sound_options are unused
 	 * and should be hidden */
 	if (libretro_supports_option_categories) {
-		option_display.key = "fceumm_show_adv_system_options";
+		option_display.key = "fceux_show_adv_system_options";
 		environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display);
 
-		option_display.key = "fceumm_show_adv_sound_options";
+		option_display.key = "fceux_show_adv_sound_options";
 		environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display);
 	}
 	/* If frontend does not support core option
@@ -851,7 +852,7 @@ static void set_variables(void) {
 	/* VS UNISystem games use internal palette regardless
 	 * of user setting, so hide fceumm_palette option */
 	if (GameInfo && (GameInfo->type == GIT_VSUNI)) {
-		option_display.key = "fceumm_palette";
+		option_display.key = "fceux_palette";
 		environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display);
 
 		/* Additionally disable gamepad palette
@@ -867,7 +868,7 @@ static void check_game_genie_variable(void) {
 	struct retro_variable var = { 0 };
 	int game_genie_enabled    = 0;
 
-	var.key = "fceumm_game_genie";
+	var.key = "fceux_game_genie";
 
 	/* Game Genie is only enabled for regular
 	 * cartridges (excludes arcade content,
@@ -1004,35 +1005,35 @@ static void set_system_region(unsigned region) {
 static void check_variables_volume_levels(void) {
 	struct retro_variable var = { 0 };
 
-	var.key = "fceumm_apu_square_1";
+	var.key = "fceux_apu_square_1";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.Square1Volume = newval;
 	}
 
-	var.key = "fceumm_apu_square_2";
+	var.key = "fceux_apu_square_2";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.Square2Volume = newval;
 	}
 
-	var.key = "fceumm_apu_triangle";
+	var.key = "fceux_apu_triangle";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.TriangleVolume = newval;
 	}
 
-	var.key = "fceumm_apu_noise";
+	var.key = "fceux_apu_noise";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.NoiseVolume = newval;
 	}
 
-	var.key = "fceumm_apu_dpcm";
+	var.key = "fceux_apu_dpcm";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
@@ -1040,42 +1041,42 @@ static void check_variables_volume_levels(void) {
 	}
 
 	/* TODO: Expansion sound volume
-	var.key = "fceumm_apu_fds";
+	var.key = "fceux_apu_fds";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.PCMVolume = newval;
 	}
 
-	var.key = "fceumm_apu_s5b";
+	var.key = "fceux_apu_s5b";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.PCMVolume = newval;
 	}
 
-	var.key = "fceumm_apu_n163";
+	var.key = "fceux_apu_n163";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.PCMVolume = newval;
 	}
 
-	var.key = "fceumm_apu_vrc6";
+	var.key = "fceux_apu_vrc6";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.PCMVolume = newval;
 	}
 
-	var.key = "fceumm_apu_vrc7";
+	var.key = "fceux_apu_vrc7";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
 		FSettings.PCMVolume = newval;
 	}
 
-	var.key = "fceumm_apu_mmc5";
+	var.key = "fceux_apu_mmc5";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
 	{
 		int newval = VOLUME_MAX * atoi(var.value) / 100;
@@ -1104,17 +1105,17 @@ static void check_variables(bool startup) {
 	/* 2 = Performs video/geometry update when needed and timing changes: e.g. region and filter change */
 	int audio_video_updated = 0;
 
-	var.key = "fceumm_sound_rate";
+	var.key = "fceux_sound_rate";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int value = atoi(var.value);
-		if (value != FSettings.SndRate) {
+		if (value != FSettings.SndRate || startup) {
 			FCEUI_Sound(value);
 			audio_video_updated |= 2;
 		}
 	}
 
-	var.key = "fceumm_ramstate";
+	var.key = "fceux_ramstate";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "random")) {
@@ -1129,7 +1130,7 @@ static void check_variables(bool startup) {
 	}
 
 #if defined(HAVE_NTSC_FILTER)
-	var.key = "fceumm_ntsc_filter";
+	var.key = "fceux_ntsc_filter";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GameInfo && GameInfo->type != GIT_NSF) {
 		unsigned orig_value = use_ntsc_filter;
@@ -1144,7 +1145,7 @@ static void check_variables(bool startup) {
 		} else if (!strcmp(var.value, "monochrome")) {
 			use_ntsc_filter = NTSC_MONOCHROME;
 		}
-		if (use_ntsc_filter != orig_value) {
+		if (use_ntsc_filter != orig_value || startup) {
 			ResetPalette();
 			audio_video_updated = 2;
 		}
@@ -1153,19 +1154,19 @@ static void check_variables(bool startup) {
 
 	FCEUI_GetRenderPlanes(nes_sprites, nes_background);
 
-	var.key = "fceumm_hide_sprites";
+	var.key = "fceux_hide_sprites";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		nes_sprites = strcmp(var.value, "enabled");
 	}
 
-	var.key = "fceumm_hide_background";
+	var.key = "fceux_hide_background";
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		nes_background = strcmp(var.value, "enabled");
 	}
 
 	FCEUI_SetRenderPlanes(nes_sprites, nes_background);
 
-	var.key = "fceumm_palette";
+	var.key = "fceux_palette";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		unsigned orig_value = current_palette;
@@ -1205,27 +1206,27 @@ static void check_variables(bool startup) {
 		else if (!strcmp(var.value, PAL_ROYAL_TEA))
 			current_palette = 13;
 
-		if (current_palette != orig_value) {
+		if (current_palette != orig_value || startup) {
 			audio_video_updated = 1;
 			ResetPalette();
 		}
 	}
 
-	var.key = "fceumm_up_down_allowed";
+	var.key = "fceux_up_down_allowed";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool value = !strcmp(var.value, "enabled") ? true : false;
 		input_allow_updown_leftright(value);
 	}
 
-	var.key = "fceumm_nospritelimit";
+	var.key = "fceux_nospritelimit";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int no_sprite_limit = (!strcmp(var.value, "enabled")) ? 1 : 0;
 		FCEUI_DisableSpriteLimitation(no_sprite_limit);
 	}
 
-	var.key = "fceumm_overclocking";
+	var.key = "fceux_overclocking";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 
@@ -1255,7 +1256,7 @@ static void check_variables(bool startup) {
 		totalscanlines = normalscanlines + (overclock_enabled ? postrenderscanlines : 0);
 	}
 
-	var.key = "fceumm_zapper_mode";
+	var.key = "fceux_zapper_mode";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		/* FCEU_ZapperSetSTMode(false); */
@@ -1271,13 +1272,13 @@ static void check_variables(bool startup) {
 		}
 	}
 
-	/* var.key = "fceumm_zapper_tolerance";
+	/* var.key = "fceux_zapper_tolerance";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		FCEU_ZapperSetTolerance(atoi(var.value));
 	}
 
-	var.key = "fceumm_zapper_trigger";
+	var.key = "fceux_zapper_trigger";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "enabled")) {
@@ -1287,7 +1288,7 @@ static void check_variables(bool startup) {
 		}
 	}
 
-	var.key = "fceumm_zapper_sensor";
+	var.key = "fceux_zapper_sensor";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "enabled")) {
@@ -1297,7 +1298,7 @@ static void check_variables(bool startup) {
 		}
 	}*/
 
-	var.key = "fceumm_arkanoid_mode";
+	var.key = "fceux_arkanoid_mode";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "touchscreen")) {
@@ -1311,14 +1312,14 @@ static void check_variables(bool startup) {
 		}
 	}
 
-	var.key = "fceumm_mouse_sensitivity";
+	var.key = "fceux_mouse_sensitivity";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		double value = atof(var.value);
 		input_set_mousesensitivity(value);
 	}
 
-	/*var.key = "fceumm_show_crosshair";
+	/*var.key = "fceux_show_crosshair";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "enabled")) {
@@ -1329,7 +1330,7 @@ static void check_variables(bool startup) {
 	}*/
 
 #if defined(PSP)
-	var.key = "fceumm_overscan";
+	var.key = "fceux_overscan";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool newval = (!strcmp(var.value, "enabled"));
@@ -1344,55 +1345,55 @@ static void check_variables(bool startup) {
 		}
 	}
 #else
-	var.key = "fceumm_overscan_left";
+	var.key = "fceux_overscan_left";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		unsigned newval = atoi(var.value);
-		if (newval != overscan_left) {
+		if (newval != overscan_left || startup) {
 			overscan_left       = newval;
 			audio_video_updated = 1;
 		}
 	}
 
-	var.key = "fceumm_overscan_right";
+	var.key = "fceux_overscan_right";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		unsigned newval = atoi(var.value);
-		if (newval != overscan_right) {
+		if (newval != overscan_right || startup) {
 			overscan_right      = newval;
 			audio_video_updated = 1;
 		}
 	}
 
-	var.key = "fceumm_overscan_top";
+	var.key = "fceux_overscan_top";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		unsigned newval = atoi(var.value);
-		if (newval != overscan_top) {
+		if (newval != overscan_top || startup) {
 			overscan_top        = newval;
 			audio_video_updated = 1;
 		}
 	}
 
-	var.key = "fceumm_overscan_bottom";
+	var.key = "fceux_overscan_bottom";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		unsigned newval = atoi(var.value);
-		if (newval != overscan_bottom) {
+		if (newval != overscan_bottom || startup) {
 			overscan_bottom     = newval;
 			audio_video_updated = 1;
 		}
 	}
 #endif
 
-	var.key = "fceumm_use_newppu";
+	var.key = "fceux_use_newppu";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool value = !strcmp(var.value, "enabled");
 		check_variables_use_newppu(value);
 	}
 
-	var.key = "fceumm_aspect";
+	var.key = "fceux_aspect";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		unsigned oldval = aspect_ratio_par;
@@ -1403,12 +1404,12 @@ static void check_variables(bool startup) {
 		} else if (!strcmp(var.value, "PP")) {
 			aspect_ratio_par = 3;
 		}
-		if (aspect_ratio_par != oldval) {
+		if (aspect_ratio_par != oldval || startup) {
 			audio_video_updated = 1;
 		}
 	}
 
-	var.key = "fceumm_turbo_enable";
+	var.key = "fceux_turbo_enable";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		if (!strcmp(var.value, "Player 1")) {
@@ -1424,14 +1425,14 @@ static void check_variables(bool startup) {
 		}
 	}
 
-	var.key = "fceumm_turbo_delay";
+	var.key = "fceux_turbo_delay";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int value = atoi(var.value);
 		input_set_turbo_delay(value);
 	}
 
-	var.key = "fceumm_region";
+	var.key = "fceux_region";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		uint8 oldval = opt_region;
@@ -1444,13 +1445,13 @@ static void check_variables(bool startup) {
 		} else if (!strcmp(var.value, "Dendy")) {
 			opt_region = 3;
 		}
-		if (opt_region != oldval) {
+		if (opt_region != oldval || startup) {
 			set_system_region(opt_region);
 			audio_video_updated = 2;
 		}
 	}
 
-	var.key = "fceumm_sndquality";
+	var.key = "fceux_sndquality";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		uint8 oldval = sndquality;
@@ -1461,26 +1462,26 @@ static void check_variables(bool startup) {
 		} else if (!strcmp(var.value, "Very High")) {
 			sndquality = 2;
 		}
-		if (sndquality != oldval) {
+		if (sndquality != oldval || startup) {
 			FCEUI_SetSoundQuality(sndquality);
 		}
 	}
 
-	var.key = "fceumm_sndlowpass";
+	var.key = "fceux_sndlowpass";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int lowpass = (!strcmp(var.value, "disabled")) ? 0 : atoi(var.value);
 		FCEUI_SetLowPass(lowpass);
 	}
 
-	/*var.key = "fceumm_reducedmcpopping";
+	/*var.key = "fceux_reducedmcpopping";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool newval = (!strcmp(var.value, "enabled"));
 		FCEUI_ReduceDmcPopping(newval);
 	}*/
 
-	var.key = "fceumm_sndstereodelay";
+	var.key = "fceux_sndstereodelay";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		enum stereo_filter_type filter_type = STEREO_FILTER_NULL;
@@ -1495,21 +1496,21 @@ static void check_variables(bool startup) {
 		}
 
 		if ((filter_type != current_stereo_filter) ||
-		    ((filter_type == STEREO_FILTER_DELAY) && (filter_delay_ms != stereo_filter_delay_ms))) {
+		    ((filter_type == STEREO_FILTER_DELAY) && (filter_delay_ms != stereo_filter_delay_ms)) || startup) {
 			current_stereo_filter  = filter_type;
 			stereo_filter_delay_ms = filter_delay_ms;
 			stereo_filter_updated  = true;
 		}
 	}
 
-	var.key = "fceumm_sndvolume";
+	var.key = "fceux_sndvolume";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		int val = (int)((float)VOLUME_MAX * atof(var.value) / 150.0f);
 		FCEUI_SetSoundVolume(val);
 	}
 
-	var.key = "fceumm_swapduty";
+	var.key = "fceux_swapduty";
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool newval = (!strcmp(var.value, "enabled"));
